@@ -1,0 +1,8 @@
+# Default owner
+* @eduardokairalla1
+
+# Backend services
+/services/backend @eduardokairalla1
+
+# Infra / deploy
+/infra/ @eduardokairalla1

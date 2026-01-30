@@ -1,0 +1,93 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+.idea/
+*.swp
+*.swo
+*.bak
+
+# Environment / Secrets
+.env
+.env.*
+!.env.example
+
+# Logs / Temp
+logs/
+*.log
+tmp/
+temp/
+.cache/
+
+
+# Node / Frontend
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+dist/
+build/
+.next/
+out/
+
+# Python / Backend
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+.venv/
+venv/
+env/
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Data / Artifacts (runtime)
+data/
+artifacts/
+outputs/
+checkpoints/
+
+# Databases (local)
+*.sqlite
+*.db
+*.duckdb
+
+# Docker
+docker-compose.override.yml
+
+# Coverage / Reports
+coverage/
+.coverage
+htmlcov/
+
+# Build system
+*.egg-info/
+.eggs/
+
+# Downloads / Dumps
+downloads/
+*.dump
+*.tar
+*.gz
+*.zip
+
+# Misc
+*.pid
+*.lock
+
+# MacOS
+.DS_Store
+
+# AI
+.claude/
