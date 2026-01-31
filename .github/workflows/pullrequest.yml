@@ -1,0 +1,117 @@
+# Workflow name displayed in GitHub Actions UI
+name: Pull Request
+
+# Multi-language microservices CI workflow
+# Structure: services/<type>/<service>/ (e.g., services/backend/reclamis/, services/frontend/web/)
+# Detection logic is in .github/scripts/detect-services.sh for maintainability
+# Currently supports: Go
+# To add support for other languages (Python, Node.js, etc.):
+#   1. Duplicate the "detect-go-services" job (e.g., "detect-python-services")
+#   2. Change the marker file in detect-services.sh call (go.mod → poetry.lock, package.json, etc.)
+#   3. Duplicate the "services-go" job (e.g., "services-python")
+#   4. Update the container image for the target language
+#   5. Replace language-specific tools installation
+#   6. Ensure the service has an executable ./scripts/test file
+
+# Trigger on pull requests and pushes to main branch
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+
+# Prevent multiple workflow runs for the same ref
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Job to detect which Go services were modified
+  # Uses .github/scripts/detect-services.sh with marker file: go.mod
+  # To add other languages: duplicate this job and change the marker file parameter
+  # (e.g., poetry.lock for Python, package.json for Node.js, Gemfile for Ruby)
+  detect-go-services:
+    name: Detect changed Go services
+    runs-on: ubuntu-latest
+    outputs:
+      services_json: ${{ steps.set-matrix.outputs.services_json }}
+      has_changes: ${{ steps.set-matrix.outputs.has_changes }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Check which files changed in services/ directory
+      - name: Detect changed files (services)
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          list-files: shell
+          filters: |
+            services:
+              - 'services/**'
+
+      # Build dynamic matrix with only modified Go services
+      - name: Build Go services matrix
+        id: set-matrix
+        shell: bash
+        run: |
+          .github/scripts/detect-services.sh \
+            "${{ steps.filter.outputs.services }}" \
+            "${{ steps.filter.outputs.services_files }}" \
+            "go.mod"
+
+  # Run CI checks for each modified Go service
+  # To add other languages: duplicate this job (e.g., "services-python", "services-node")
+  # and update container, tools installation, and dependencies
+  services-go:
+    name: CI - Go (${{ matrix.type }}/${{ matrix.service }})
+    needs: detect-go-services
+    if: needs.detect-go-services.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+
+    # Use Go container for consistent environment
+    container:
+      image: golang:1.25-alpine
+
+    # Run jobs in parallel for each service
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.detect-go-services.outputs.services_json) }}
+
+    # Set working directory to service folder
+    defaults:
+      run:
+        working-directory: services/${{ matrix.type }}/${{ matrix.service }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Cache Go modules and build cache for faster builds
+      - name: Cache Go dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: go-${{ matrix.type }}-${{ matrix.service }}-${{ hashFiles(format('services/{0}/{1}/go.sum', matrix.type, matrix.service)) }}
+          restore-keys: |
+            go-${{ matrix.type }}-${{ matrix.service }}-
+
+      # Install system dependencies and Go tools required for CI
+      - name: Install system dependencies
+        run: |
+          apk add --no-cache gcc g++ git bash make tar
+
+      # Install Go CI tools (gci for import formatting, golangci-lint for linting)
+      - name: Install Go tools
+        run: |
+          go install github.com/daixiang0/gci@v0.13.7
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
+
+      # Download Go module dependencies
+      - name: Download dependencies
+        run: go mod download
+
+      # Run service-specific CI checks (import validation, linting, tests)
+      - name: Run service CI script
+        env:
+          SKIP_GCI: "1"
+        run: ./scripts/test

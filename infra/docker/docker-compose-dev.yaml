@@ -1,0 +1,17 @@
+# --- Voxly Dev Compose ---
+
+services:
+
+  # --- SERVICES ---
+  reclamis:
+    image: reclamis-dev:latest
+    build:
+      context: ./images/dev/go
+      dockerfile: Dockerfile
+    healthcheck:
+      disable: true
+    volumes:
+      - ../../services/backend/reclamis:/root/reclamis
+    ports:
+      - "10001:22"
+      - "8080:8080"
