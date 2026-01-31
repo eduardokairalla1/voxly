@@ -1,0 +1,9 @@
+# gci configuration file
+
+sections:
+  - standard  # stdlib
+  - default   # external packages
+  - prefix(github.com/eduardokairalla1/voxly/backend/reclamis)  # local
+
+section-separators:
+  - newLine

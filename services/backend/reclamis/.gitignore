@@ -1,0 +1,42 @@
+# Binaries
+bin/
+dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go build artifacts
+*.test
+*.out
+
+# Coverage
+coverage.out
+coverage.txt
+*.coverprofile
+
+# Go workspace / modules
+go.work
+go.work.sum
+
+# Vendor (se você usar)
+vendor/
+
+# Logs / temp
+*.log
+tmp/
+*.tmp
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# OS files
+.DS_Store
+
+# Env files / secrets
+.env
+.env.*
+!.env.example

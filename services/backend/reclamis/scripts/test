@@ -1,0 +1,22 @@
+#!/bin/bash -eu
+
+# running in CI: skip gci
+if [ "${SKIP_GCI:-}" = "1" ]; then
+  echo "CI=true - skipping gci."
+
+# not running in CI: run gci
+else
+  gci diff -s standard -s default -s "prefix(github.com/eduardokairalla1/voxly/backend/reclamis)" .
+fi
+
+# validate guidelines
+golangci-lint run ./...
+
+# no tests to run: log and success exit
+if ! find ./tests -type f -name '*_test.go' -print -quit | grep -q .; then
+  echo "No tests found under ./tests - skipping."
+  exit 0
+fi
+
+# run unit tests
+go test ./tests/... -race -count=1

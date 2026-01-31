@@ -1,0 +1,29 @@
+# Air configuration for development
+
+root = "."
+tmp_dir = "tmp"
+
+[build]
+# Build the binary from cmd/reclamis
+cmd = "go build -o ./bin/api ./cmd/reclamis"
+
+# Binary executed by Air
+bin = "./bin/api"
+
+# Delay before rebuilding (milliseconds)
+delay = 1000
+
+# Directories to ignore
+exclude_dir = ["bin", "tmp", "vendor", ".git"]
+
+# File extensions to watch
+include_ext = ["go"]
+
+# Stop Air if build fails
+stop_on_error = true
+
+[log]
+time = true
+
+[misc]
+clean_on_exit = true

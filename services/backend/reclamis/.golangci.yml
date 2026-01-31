@@ -1,0 +1,48 @@
+# GolangCI-Lint configuration file
+
+run:
+  timeout: 5m
+  tests: false
+
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - typecheck
+    - unused
+    - gofmt
+    - goimports
+    - revive
+    - gocritic
+    - misspell
+
+linters-settings:
+  revive:
+    rules:
+      - name: exported
+        disabled: true
+  
+  gocritic:
+    disabled-checks:
+      - commentFormatting
+
+issues:
+  exclude-rules:
+    - linters:
+        - revive
+      text: "struct-tag"
+    
+    - linters:
+        - revive
+      text: "cognitive-complexity"
+
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+output:
+  formats: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true

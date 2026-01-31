@@ -1,0 +1,26 @@
+#!/bin/bash -eu
+
+# Variables
+readonly DOCKER_USER=${DOCKER_USER:-}
+readonly VERSION="$(cat VERSION)"
+readonly TAG="${DOCKER_USER:+$DOCKER_USER/}reclamis:$VERSION"
+
+# Build image
+echo "Building Docker image: $TAG"
+docker build \
+  --no-cache \
+  --rm \
+  --build-arg VERSION="$VERSION" \
+  --tag "$TAG" \
+  --file docker/Dockerfile .
+
+# Push image
+echo
+read -p "Do you want to push this image to Docker Hub? (y/n): " RESP
+if [[ "$RESP" =~ ^[yY]$ ]]; then
+  echo "Pushing image to Docker Hub..."
+  docker push "$TAG"
+  echo "Image pushed as $TAG"
+else
+  echo "Image saved locally as $TAG. Push skipped."
+fi
